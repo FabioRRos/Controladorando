@@ -246,3 +246,95 @@ func SalvarContratos(contratos []entity.Contratos) error {
 	// Salva a limpeza e a inserção de uma vez só!
 	return tx.Commit()
 }
+
+func SalvarCargosSalarios(cargos []entity.CargosSalarios) error {
+	strConexao := "postgres://pirajui:vKEP82XuP@ssw0rdMoreka@2129@localhost:5432/Pirajui?sslmode=disable"
+	db, err := sql.Open("postgres", strConexao)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	// Limpa a tabela
+	_, err = tx.Exec("TRUNCATE TABLE cargos_salarios RESTART IDENTITY;")
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	query := `
+		INSERT INTO cargos_salarios (
+			plano_cargo, cargo_id, cargo, referencia, valor, codigo
+		) VALUES ($1, $2, $3, $4, $5, $6)`
+
+	stmt, err := tx.Prepare(query)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	defer stmt.Close()
+
+	for _, c := range cargos {
+		_, err = stmt.Exec(
+			c.PlanoCargo, c.CargoId, c.Cargo, c.Referencia, c.Valor, c.Codigo,
+		)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	return tx.Commit()
+}
+
+func SalvarFolha(folhas []entity.FolhaPagamento, nomeTabela string) error {
+	strConexao := "postgres://pirajui:vKEP82XuP@ssw0rdMoreka@2129@localhost:5432/Pirajui?sslmode=disable"
+	db, err := sql.Open("postgres", strConexao)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	// A consulta usa o nomeTabela dinâmico (folha_mensal ou folha_rescisao)
+	query := fmt.Sprintf(`
+		INSERT INTO %s (
+			detalhe, referencia, referencia_salarial, nome, divisao, cargo, matricula,
+			proventos, descontos, liquido, data_admissao, data_desligamento, tipo_regime,
+			situacao_funcional, tipo_contrato, data_prevista_termino_contrato
+		) VALUES (
+			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+			$11, $12, $13, $14, $15, $16
+		)`, nomeTabela)
+
+	stmt, err := tx.Prepare(query)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	defer stmt.Close()
+
+	for _, f := range folhas {
+		_, err = stmt.Exec(
+			f.Detalhe, f.Referencia, f.ReferenciaSalarial, f.Nome, f.Divisao, f.Cargo, f.Matricula,
+			f.Proventos, f.Descontos, f.Liquido,
+			validaData(f.DataAdmissao), validaData(f.DataDesligamento), f.TipoRegime,
+			f.SituacaoFuncional, f.TipoContrato, validaData(f.DataPrevistaTerminoContrato),
+		)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	return tx.Commit()
+}

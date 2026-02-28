@@ -12,6 +12,15 @@ import (
 // Agora ela recebe a pasta e retorna um erro (se der ruim)
 func BaixarCSV(pastaDestino string) error {
 
+	hoje := time.Now()
+	mes := hoje.Month()
+	dia := hoje.Day()
+	ano := hoje.Year()
+
+	if dia != 15 {
+		return fmt.Errorf("Ainda não é dia 15")
+	}
+
 	// Inicia o Playwright
 	pw, err := playwright.Run()
 	if err != nil {
@@ -40,6 +49,9 @@ func BaixarCSV(pastaDestino string) error {
 		return fmt.Errorf("erro ao acessar a página: %w", err)
 	}
 
+	diaTextoInicial := fmt.Sprintf("%02d/%02d/%d", 15, mes-1, ano)
+	diaTextoFinal := fmt.Sprintf("%02d/%02d/%d", 15, mes, ano)
+
 	time.Sleep(2 * time.Second)
 	fmt.Println("Clicando em Receitas...")
 	frame := page.FrameLocator("iframe, frame").First()
@@ -51,10 +63,10 @@ func BaixarCSV(pastaDestino string) error {
 	// 3. Seleciona a data inicial e data final
 
 	fmt.Println("Preenchendo as datas...")
-	if err = frame.Locator("#datDataInicial_I").Fill("01/01/2026"); err != nil {
+	if err = frame.Locator("#datDataInicial_I").Fill(diaTextoInicial); err != nil {
 		return fmt.Errorf("erro ao preencher data inicial: %w", err)
 	}
-	if err = frame.Locator("#datDataFinal_I").Fill("31/01/2026"); err != nil {
+	if err = frame.Locator("#datDataFinal_I").Fill(diaTextoFinal); err != nil {
 		return fmt.Errorf("erro ao preencher data final: %w", err)
 	}
 

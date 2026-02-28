@@ -46,12 +46,13 @@ func BaixarCSVDespesas(pastaDestino string, nomeArquivoCustomizado string) (stri
 	}
 
 	time.Sleep(3 * time.Second)
+	hoje := time.Now()
 
 	fmt.Println("Preenchendo as datas...")
-	if err = frame.Locator("#datDataInicial_I").Fill("01/01/2026"); err != nil {
+	if err = frame.Locator("#datDataInicial_I").Fill(hoje.Format("02/01/2006")); err != nil {
 		return "", fmt.Errorf("erro ao preencher data inicial: %w", err)
 	}
-	if err = frame.Locator("#datDataFinal_I").Fill("31/01/2026"); err != nil {
+	if err = frame.Locator("#datDataFinal_I").Fill(hoje.Format("02/01/2006")); err != nil {
 		return "", fmt.Errorf("erro ao preencher data final: %w", err)
 	}
 
