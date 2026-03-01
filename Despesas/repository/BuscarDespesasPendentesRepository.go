@@ -22,7 +22,7 @@ WHERE d.empenho IN (
     FROM despesas
     GROUP BY empenho
     HAVING COUNT(*) = 1
-);`
+)order by id asc;`
 	rows, err := db.Query(query)
 	if err != nil {
 		return nil, fmt.Errorf("erro ao buscar despesas pendentes: %w", err)
@@ -65,7 +65,8 @@ WHERE d.empenho IN (
     FROM despesas
     GROUP BY empenho
     HAVING COUNT(*) > 1
-);`
+)
+order by id asc;;`
 	rows, err := db.Query(query)
 	if err != nil {
 		return nil, fmt.Errorf("erro ao buscar despesas pendentes: %w", err)
@@ -92,6 +93,9 @@ WHERE d.empenho IN (
 	return lista, nil
 }
 func MarcarDespesaComoProcessada(connStr string, id int) error {
+
+	fmt.Println("Baixar ID:", id)
+
 	// 1. Abrir conexão
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {

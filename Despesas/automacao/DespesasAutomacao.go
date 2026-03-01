@@ -20,7 +20,7 @@ func BaixarDespesas() {
 
 	// 2. Lançar o Browser
 	browser, err := pw.Chromium.Launch(playwright.BrowserTypeLaunchOptions{
-		Headless: playwright.Bool(false), // Mude para true depois
+		Headless: playwright.Bool(true),
 	})
 	if err != nil {
 		log.Fatalf("Não foi possível lançar o browser: %v", err)

@@ -4,6 +4,7 @@ import (
 	"despesas/automacao"
 	"despesas/repository"
 	"despesas/services"
+	"despesas/utils"
 	"fmt"
 	"log"
 	"os"
@@ -14,19 +15,28 @@ import (
 var strConn string = "postgres://pirajui:vKEP82XuP@ssw0rdMoreka@2129@localhost:5432/DespesaService?sslmode=disable"
 
 func main() {
+	if err := utils.InitLogger(); err != nil {
+		log.Fatal(err)
+	}
 
-	//DespesasInicio()
+	utils.Logger.Println("Processo iniciado")
+
+	DespesasInicio()
 
 	EmpenhoInicio()
 
 }
 
 func EmpenhoInicio() {
+	utils.Logger.Println("############# Chamando Função Empenho Inicio ############# ")
+
 	services.ProcessarDespesas(strConn)
 }
 
 func DespesasInicio() {
+
 	automacao.BaixarDespesas()
+	utils.Logger.Println("############# Chamando Função DespensaInicio ############# ")
 
 	diretorioatual, _ := os.Getwd()
 	var caminho string
@@ -35,8 +45,6 @@ func DespesasInicio() {
 	} else {
 		caminho = filepath.Join(diretorioatual, "cmd", "temp", "despesas.csv")
 	}
-
-	//caminho := filepath.Join("cmd", "temp", "despesas.csv")
 
 	listaDespesas, err := services.ConverterCSVDespesasParaEntidade(caminho)
 	if err != nil {
